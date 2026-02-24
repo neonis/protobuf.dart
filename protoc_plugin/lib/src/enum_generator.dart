@@ -227,49 +227,78 @@ class EnumGenerator extends ProtobufContainer {
         out.println('];');
         out.println();
 
-        var maxEnumValue = -1;
-        for (final valueDescriptor in _canonicalValues) {
-          if (valueDescriptor.number.isNegative) {
-            maxEnumValue = -1; // don't use list
-            break;
-          }
-          if (valueDescriptor.number > maxEnumValue) {
-            maxEnumValue = valueDescriptor.number;
-          }
-        }
+        // var maxEnumValue = -1;
+        // for (final valueDescriptor in _canonicalValues) {
+        //   if (valueDescriptor.number.isNegative) {
+        //     maxEnumValue = -1; // don't use list
+        //     break;
+        //   }
+        //   if (valueDescriptor.number > maxEnumValue) {
+        //     maxEnumValue = valueDescriptor.number;
+        //   }
+        // }
 
-        final useList =
-            _canonicalValues.isEmpty ||
-            (maxEnumValue >= 0 &&
-                _canonicalValues.length / (maxEnumValue + 1) >= 0.7);
+        // final useList =
+        //     _canonicalValues.isEmpty ||
+        //     (maxEnumValue >= 0 &&
+        //         _canonicalValues.length / (maxEnumValue + 1) >= 0.7);
 
-        if (useList) {
-          out.println(
-            'static final $coreImportPrefix.List<$classname?> _byValue ='
-            ' $protobufImportPrefix.ProtobufEnum.\$_initByValueList(values, $maxEnumValue);',
-          );
+        // if (useList) {
+        //   out.println(
+        //     'static final $coreImportPrefix.List<$classname?> _byValue ='
+        //     ' $protobufImportPrefix.ProtobufEnum.\$_initByValueList(values, $maxEnumValue);',
+        //   );
 
-          out.println(
-            'static $classname? valueOf($coreImportPrefix.int value) =>'
-            '  value < 0 || value >= _byValue.length ? null : _byValue[value];',
-          );
-        } else {
-          out.println(
-            'static final $coreImportPrefix.Map<$coreImportPrefix.int, $classname> _byValue ='
-            ' $protobufImportPrefix.ProtobufEnum.initByValue(values);',
-          );
+        //   out.println(
+        //     'static $classname? valueOf($coreImportPrefix.int value) =>'
+        //     '  value < 0 || value >= _byValue.length ? null : _byValue[value];',
+        //   );
+        // } else {
+        //   out.println(
+        //     'static final $coreImportPrefix.Map<$coreImportPrefix.int, $classname> _byValue ='
+        //     ' $protobufImportPrefix.ProtobufEnum.initByValue(values);',
+        //   );
 
-          out.println(
-            'static $classname? valueOf($coreImportPrefix.int value) =>'
-            ' _byValue[value];',
-          );
-        }
+        //   out.println(
+        //     'static $classname? valueOf($coreImportPrefix.int value) =>'
+        //     ' _byValue[value];',
+        //   );
+        // }
 
+        // out.println();
+
+        // out.println('const $classname._(super.value, super.name);');
+        out.println(
+          'static final $coreImportPrefix.Map<$coreImportPrefix.int, $classname> _byValue ='
+          ' $protobufImportPrefix.ProtobufEnum.initByValue(values);',
+        );
+
+        out.println(
+          'static final $coreImportPrefix.Set<$coreImportPrefix.int> _knownValues ='
+          ' _byValue.keys.toSet();',
+        );
+        
+        // Unknown enum values are materialized as dynamic enum instances instead of
+        // falling back to the first enum value.
+        out.println(
+          'static $classname valueOf($coreImportPrefix.int value) =>'
+          ' _byValue[value] ??='
+          ' $classname._(value, _omitEnumNames ? \'\' : \'UNRECOGNIZED_\$value\', true);',
+        );
+        
+        out.println(
+          'static $coreImportPrefix.bool isKnownValue($coreImportPrefix.int value) =>'
+          ' _knownValues.contains(value);',
+        );
+        
         out.println();
-
-        out.println('const $classname._(super.value, super.name);');
-      },
-    );
+        
+        out.println('final $coreImportPrefix.bool isUnknown;');
+        out.println(
+          'const $classname._(super.value, super.name, [this.isUnknown = false]);',
+        );
+              },
+            );
   }
 
   /// Writes a Dart constant containing the JSON for the [EnumDescriptorProto].
